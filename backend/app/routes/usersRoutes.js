@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../db/db');
 
 // Ruta para obtener usuarios con paginación
-router.get('/usuarios', async (req, res) => {
+router.get('/users', async (req, res) => {
   try {
     // Obtener `limit` y `offset` de los parámetros de consulta, con valores predeterminados
     const limit = parseInt(req.query.limit) || 5;  // Predeterminado a 10 elementos
@@ -27,7 +27,7 @@ router.get('/usuarios', async (req, res) => {
 });
 
 // Ruta para obtener un usuario por su ID
-router.get('/usuarios/:id', async (req, res) => {
+router.get('/users/:id', async (req, res) => {
   try {
     // Obtener el ID de los parámetros de la solicitud
     const id = req.params.id;
@@ -52,7 +52,7 @@ router.get('/usuarios/:id', async (req, res) => {
 });
 
 // Ruta para crear un nuevo usuario
-router.post('/usuarios', async (req, res) => {
+router.post('/users/create', async (req, res) => {
   try {
     // Obtener los datos del usuario del cuerpo de la solicitud
     const { nombre, correo, telefono, contrasena, foto} = req.body;
@@ -77,7 +77,7 @@ router.post('/usuarios', async (req, res) => {
 });
 
 // Ruta para actualizar un usuario por su ID
-router.put('/usuarios/:id', async (req, res) => {
+router.put('/users/:id', async (req, res) => {
   try {
     // Obtener el ID y los datos del usuario del cuerpo de la solicitud
     const id = req.params.id;
@@ -108,7 +108,7 @@ router.put('/usuarios/:id', async (req, res) => {
 });
 
 // Ruta para eliminar un usuario por su ID
-router.delete('/usuarios/:id/delete', async (req, res) => {
+router.delete('/users/:id/delete', async (req, res) => {
   try {
     // Obtener el ID de los parámetros de la solicitud
     const id = req.params.id;
@@ -133,7 +133,7 @@ router.delete('/usuarios/:id/delete', async (req, res) => {
 });
 
 // Ruta para obtener la tabla user_preferencias por el id del usuario
-router.get('/usuarios/:id/preferencias', async (req, res) => {
+router.get('/users/:id/preferencias', async (req, res) => {
   try {
     // Obtener el ID de los parámetros de la solicitud
     const id = req.params.id;
@@ -154,6 +154,36 @@ router.get('/usuarios/:id/preferencias', async (req, res) => {
   } catch (error) {
     console.error('Error al obtener las preferencias del usuario:', error);
     res.status(500).json({ error: 'Error al obtener las preferencias del usuario' });
+  }
+});
+
+// Ruta para verificar que un usuario existe por su correo y contraseña
+router.post('/users/login', async (req, res) => {
+  try {
+    // Obtener los datos del usuario del cuerpo de la solicitud
+    const { email, password } = req.body;
+
+    // Validar que los datos requeridos se proporcionen
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Faltan datos requeridos' });
+    }
+
+    // Consulta a la base de datos para verificar que un usuario existe por su correo y contraseña
+    const result = await pool.query('SELECT * FROM users WHERE email = $1 AND password = $2', [email, password]);
+
+    // Si no se encontró el usuario, enviar un error 404
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Enviar respuesta JSON con los datos del usuario
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Error al verificar el usuario:', error);
+    res.status(500).json({ error: 'Error al verificar el usuario' });
   }
 });
 

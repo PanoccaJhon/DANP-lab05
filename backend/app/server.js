@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 
 // Importar las rutas
@@ -7,6 +8,9 @@ const artistsRoutes = require('./routes/artistsRoutes');
 const galleriesRoutes = require('./routes/galleriesRoutes');
 const exhibitionsRoutes = require('./routes/exhibitionsRoutes');
 const worksRoutes = require('./routes/worksRoutes');
+
+// Servir imágenes desde el directorio 'images' dentro de 'server'
+app.use('/api/img', express.static(path.join(__dirname, 'public')));
 
 // Middleware para las rutas
 app.use('/api', usersRoutes);

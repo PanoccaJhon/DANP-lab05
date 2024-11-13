@@ -4,7 +4,7 @@ const router = express.Router();
 const pool = require('../db/db');
 
 // Ruta para obtener obras con paginación
-router.get('/obras', async (req, res) => {
+router.get('/works', async (req, res) => {
   try {
     // Obtener `limit` y `offset` de los parámetros de consulta, con valores predeterminados
     const limit = parseInt(req.query.limit) || 5;  // Predeterminado a 10 elementos
@@ -24,6 +24,31 @@ router.get('/obras', async (req, res) => {
   } catch (error) {
     console.error('Error al obtener las obras:', error);
     res.status(500).json({ error: 'Error al obtener las obras' });
+  }
+});
+
+// Ruta para obtener una obra por su ID
+router.get('/works/:id', async (req, res) => {
+  try {
+    // Obtener el ID de los parámetros de la solicitud
+    const id = req.params.id;
+
+    // Consulta a la base de datos para obtener una obra por su ID
+    const result = await pool.query('SELECT * FROM works WHERE id = $1', [id]);
+
+    // Si no se encontró la obra, enviar un error 404
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Obra no encontrada' });
+    }
+
+    // Enviar respuesta JSON con los datos de la obra
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Error al obtener la obra:', error);
+    res.status(500).json({ error: 'Error al obtener la obra' });
   }
 });
 
